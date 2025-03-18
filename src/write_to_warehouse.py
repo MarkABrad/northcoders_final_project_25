@@ -19,11 +19,11 @@ Possibly separate out into:
 - populate warehouse with processed files
 """
 
-PG_USER = "project_team_4"
-PG_PASSWORD = "9oOBwGHBqmo161l"
-PG_HOST = "nc-data-eng-project-dw-prod.chpsczt8h1nu.eu-west-2.rds.amazonaws.com"
-PG_DATABASE = "postgres"
-PG_PORT = 5432
+PG_USER = os.getenv("WH_USER")
+PG_PASSWORD = os.getenv("WH_PASSWORD")
+PG_HOST = os.getenv("WH_HOST")
+PG_DATABASE = os.getenv("WH_DATABASE")
+PG_PORT = os.getenv("WH_PORT")
 
 # read from s3 processed bucket
 
