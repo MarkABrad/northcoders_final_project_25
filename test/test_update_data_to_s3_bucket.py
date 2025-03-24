@@ -123,7 +123,7 @@ class TestUploadsDataWithTimeStamp:
                     pprint(f"File content for {json_file_last_updated}: {file_content}")
                     
                 except json.JSONDecodeError as e:
-                    pprint(f"Error decoding JSON in {fil_key}: {e}")
+                    pprint(f"Error decoding JSON in {file_key}: {e}")
                 except Exception as e:
                     pprint(f"An unexpected error occurred for {json_file_last_updated}: {e}")
 
