@@ -81,12 +81,9 @@ class TestUploadsDataWithTimeStamp:
 
             for file_key in json_file_on_s3['Contents']:
                 if file_key["Key"].endswith('.json'):
-                    pprint(f"Checking file: {file_key['Key']}")
-                    print(f'{file_key}, <<<<<huna')
                     file_key_without_extension = file_key["Key"].replace('.json', '')
                     timestamp_str = file_key_without_extension.split('/')[1:5]  
                     timestamp = ' '.join(timestamp_str)
-                    print(f"Extracted timestamp: {timestamp}")
                     try:
                         timestamp_obj = datetime.strptime(timestamp, '%Y %m %d %H:%M:%S.%f')
                         timestamped_files.append((file_key["Key"], timestamp_obj))
@@ -100,9 +97,6 @@ class TestUploadsDataWithTimeStamp:
                 print(f"Most recent file is: {json_file_last_updated}")
             else:
                 print("No JSON files found in the bucket.")
-
-            print(f"Actual: {json_file_last_updated}")
-            print(f"Expected: counterparty/2026/02/03/14:20:51.563000.json")
 
             assert json_file_last_updated == 'counterparty/2026/02/03/14:20:51.563000.json'
 
@@ -142,7 +136,7 @@ class TestUploadsDataWithTimeStamp:
                 with open('test/test_data/test_data.json','r') as f:
                     db_data = json.load(f)["counterparty"]
 
-                db_data.append(additional_data[0])
+                db_data.append(mock_additional_data("x","y")[0])
                 expected = db_data
 
                 assert sorted(data_from_s3_bucket, key=lambda d: d["counterparty_id"]) == \
