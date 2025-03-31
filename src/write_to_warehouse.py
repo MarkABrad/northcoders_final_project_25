@@ -117,7 +117,6 @@ def write_to_warehouse(data_frames_dict):
         if conn:
             conn.close()
 
-
 # Insert data into redshift via postgres query
 # upload to warehouse in defined intervals
 # must be adequately logged in cloudwatch

@@ -1,10 +1,8 @@
-from src.create_dim_tables import make_dim_tables,set_up_dims_table,put_info_into_dims_schema
+from src.create_dim_tables import make_dim_tables
 from src.connection import connect_to_db, close_db_connection
 from src.create_raw_tables import make_raw_tables
 import pytest
 from unittest import mock
-from src.dim_date_function import extract_date_info_from_dim_date
-from src.get_currency_name import get_currency_details
 
 # Table headers defined at bottom of file
 
@@ -24,6 +22,7 @@ def date_id():
 def currency_id():
     return 1
 
+
 @pytest.fixture
 def mock_db_connection():
     mock_db = mock.MagicMock()
@@ -34,9 +33,9 @@ class TestSetUpDimsTable:
 
     def test_six_tables_created(self):
         test_db = connect_to_db()
-        make_raw_tables(lambda_local_db)
+        make_raw_tables(test_db)
         test_input = ["address","counterparty","currency","department","design","sales_order","staff"]
-        make_dim_tables(test_db)
+        make_dim_tables(test_db, test_input)
 
         for table in dim_tables_column_headers:
             test_db.run(f"SELECT * FROM {table};")
@@ -47,8 +46,8 @@ class TestSetUpDimsTable:
 
     def test_tables_are_empty(self):
         test_db = connect_to_db()
-        test_input = ["address","counterparty","currency","department","design","sales_order","staff"]
-        make_dim_tables(test_db)
+        test_input = ["address", "counterparty", "currency", "department", "design", "sales_order", "staff"]
+        make_dim_tables(test_db, test_input)
 
         for table in dim_tables_column_headers:
             result = test_db.run(f"SELECT * FROM {table};")
@@ -62,14 +61,14 @@ class TestPutInfontoDimsSchema():
         with pytest.raises(Exception,match="No rows outputted"):
             test_input = []
             test_db = connect_to_db()
-            make_dim_tables(test_db)
+            make_dim_tables(test_db, test_input)
         close_db_connection(test_db)
 
     def test_wrong_name_provided(self):
         with pytest.raises(Exception,match="Dimension table names requested are not valid"):
             test_input = ["test_wrong_name"]
             test_db = connect_to_db()
-            make_dim_tables(test_db)
+            make_dim_tables(test_db, test_input)
         close_db_connection(test_db)
 
     def test_insertion_for_one_table(self):
@@ -91,9 +90,9 @@ class TestPutInfontoDimsSchema():
          "last_updated": "2022-11-03T14:20:49.962000"
         }]}
         test_db = connect_to_db()
-        func_result = make_temporary_tables(test_db,test_input)
+        func_result = make_raw_tables(test_db, test_input)
         table_names = func_result[0]
-        result = make_dim_tables(test_db)
+        result = make_dim_tables(test_db, table_names)
         assert result["dim_staff"] == [[1, 'Jeremie', 'Franey', 'Sales', 'Manchester', 'jeremie.franey@terrifictotes.com']]
         close_db_connection(test_db)            
 
@@ -117,9 +116,9 @@ class TestPutInfontoDimsSchema():
 
         test_db = connect_to_db()
 
-        func_result = make_temporary_tables(test_db, test_input)
+        func_result = make_raw_tables(test_db, test_input)
         table_names = func_result[0]
-        result = make_dim_tables(test_db)
+        result = make_dim_tables(test_db, table_names)
         assert result["dim_staff"] == [[1, 'Jeremie', 'Franey', 'Sales', 'Manchester', 'jeremie.franey@terrifictotes.com']]
 
         close_db_connection(test_db)
@@ -143,9 +142,9 @@ class TestPutInfontoDimsSchema():
             "last_updated": "2022-11-03T14:20:49.962000"
             }]}
             test_db = connect_to_db()
-            func_result = make_temporary_tables(test_db,test_input)
+            func_result = make_raw_tables(test_db,test_input)
             table_names = func_result[0]
-            make_dim_tables(test_db)
+            make_dim_tables(test_db, table_names)
             close_db_connection(test_db)
 
 # Mocked database connection 
@@ -161,12 +160,11 @@ def test_process_dim_date(mock_db_connection, date_id):
         mock_extract_date.return_value = {'day': 3, 'month': 11, 'year': 2022} 
 
         date_id = '2022-11-03T14:20:51.563000' 
-        currency_id = 1
         dim_tables_created = ["dim_date", "dim_currency"]   
         # Mocks database connection
         mock_db_connection.run.return_value = [{"result": "success" }]
 
-        result = make_dim_tables(mock_db_connection)
+        result = make_dim_tables(mock_db_connection, dim_tables_created)
 
         print(f"mock_extract_date.call_count: {mock_extract_date.call_count}")
         print("mock called", mock_extract_date.call_args_list)
@@ -189,11 +187,10 @@ def test_process_dim_currency(mock_db_connection, currency_id):
 
         dim_tables_created = ["dim_currency", "dim_date"]  
         currency_id = 1 
-        date_id = '2022-11-03T14:20:51.563000'
 
         mock_db_connection.run.return_value = [{"result": "success"}]
         
-        result = make_dim_tables(mock_db_connection)
+        result = make_dim_tables(mock_db_connection, dim_tables_created)
 
         print(f"mock_get_currency.call_count: {mock_get_currency.call_count}")
 

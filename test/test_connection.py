@@ -14,4 +14,4 @@ def test_connects_to_database():
     conn = connect_to_db()
     assert isinstance(conn, Connection)
     close_db_connection(conn)
-
+    
