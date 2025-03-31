@@ -26,22 +26,22 @@ def read_files_from_s3(bucket_name, client=None):
     try:
         all_data = {}
         for table in tables:
-            # try:
-            #     file_response = client.get_object(
-            #         Bucket=bucket_name, Key=f"last_processed/{table}.txt"
-            #     )
-            #     last_file_processed = (
-            #         file_response["Body"].read().decode("utf-8")
-            #     )  # name of file last processed
-            #     date_last_updated = last_file_processed.split("/", 1)[
-            #         1
-            #     ]  # datetime from the file
-            #     # read the txt file with json file last uploaded from that tables data, date asigned to variable
-            # except:
-            #     last_file_processed = ""
-            #     date_last_updated = (
-            #         ""  # if no last updated file, define variables and set to min
-            #     )
+            try:
+                file_response = client.get_object(
+                    Bucket=bucket_name, Key=f"last_processed/{table}.txt"
+                )
+                last_file_processed = (
+                    file_response["Body"].read().decode("utf-8")
+                )  # name of file last processed
+                date_last_updated = last_file_processed.split("/", 1)[
+                    1
+                ]  # datetime from the file
+                # read the txt file with json file last uploaded from that tables data, date asigned to variable
+            except:
+                last_file_processed = ""
+                date_last_updated = (
+                    ""  # if no last updated file, define variables and set to min
+                )
             try:
                 if (
                     table == "staff"

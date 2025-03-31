@@ -259,7 +259,6 @@ class TestWriteToWarehouse:
 
             # print(response)
 
-
         # mock_s3.get_object.return_value = {"Body": fake_parquet_data}
 
         # output = read_from_s3_processed_bucket(s3_client=mock_s3)
@@ -268,8 +267,6 @@ class TestWriteToWarehouse:
 
         # pd.testing.assert_frame_equal(result_df, mock_df)
 
-
-
         # print(response)
 
         # mock_s3.list_objects_v2.return_value = {
@@ -277,8 +274,6 @@ class TestWriteToWarehouse:
         # }
 
         # fake_parquet_data = io.BytesIO()
-
-
 
         # output = read_from_s3_processed_bucket(s3_client=mock_s3)
 
@@ -289,10 +284,6 @@ class TestWriteToWarehouse:
         # self.assertIn("fact_sales_order", result_df)
 
         # self.assertIsInstance(result_df["fact_sales_order"], pd.DataFrame)
-
-
-
-
 
     # mock_s3 = MagicMock()
     
@@ -309,10 +300,6 @@ class TestWriteToWarehouse:
     # assert output["fact_sales_order"] == b"dogandcat"
 
     # mock_s3 = MagicMock()
-
-
-
-
 
 # test 2 - retrieving data from s3 processed bucket
 # test 3 - data successfully populated to warehouse
