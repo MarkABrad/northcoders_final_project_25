@@ -1,6 +1,6 @@
 from src.create_dim_tables import make_dim_tables,set_up_dims_table,put_info_into_dims_schema
 from src.connection import connect_to_db, close_db_connection
-from src.create_temporary_tables import make_temporary_tables
+from src.create_raw_tables import make_raw_tables
 import pytest
 from unittest import mock
 from src.dim_date_function import extract_date_info_from_dim_date
@@ -34,7 +34,7 @@ class TestSetUpDimsTable:
 
     def test_six_tables_created(self):
         test_db = connect_to_db()
-        make_temporary_tables(lambda_local_db)
+        make_raw_tables(lambda_local_db)
         test_input = ["address","counterparty","currency","department","design","sales_order","staff"]
         make_dim_tables(test_db)
 

@@ -1,10 +1,7 @@
-
 import psycopg2
-import sys
 import boto3
 import os
 import pandas as pd
-import re
 from datetime import datetime
 import io
 from pprint import pprint
@@ -27,7 +24,16 @@ PG_PORT = os.getenv("WH_PORT")
 
 # read from s3 processed bucket
 
-table_names = ["fact_sales_order", "dim_staff", "dim_date", "dim_counterparty", "dim_location", "dim_currency", "dim_design"]
+table_names = [
+    "fact_sales_order",
+    "dim_staff",
+    "dim_date",
+    "dim_counterparty",
+    "dim_location",
+    "dim_currency",
+    "dim_design",
+]
+
 
 def read_from_s3_processed_bucket(s3_client=None):
 
@@ -39,7 +45,9 @@ def read_from_s3_processed_bucket(s3_client=None):
     for table in table_names:
         file_dates_list = []
 
-        objects = s3_client.list_objects_v2(Bucket="processed-bucket20250303162226216400000005", Prefix=f"{table}/")
+        objects = s3_client.list_objects_v2(
+            Bucket="processed-bucket20250303162226216400000005", Prefix=f"{table}/"
+        )
         pprint(objects)
 
         if "Contents" not in objects or not objects["Contents"]:
@@ -51,8 +59,10 @@ def read_from_s3_processed_bucket(s3_client=None):
             filename_timestamp_format = "%Y-%m-%d_%H-%M-%S"
 
             try:
-                filename_timestamp_str = key.split(f"{table}_")[1].split(".parquet")[0] 
-                timestamp = datetime.strptime(filename_timestamp_str, filename_timestamp_format)
+                filename_timestamp_str = key.split(f"{table}_")[1].split(".parquet")[0]
+                timestamp = datetime.strptime(
+                    filename_timestamp_str, filename_timestamp_format
+                )
                 file_dates_list.append((timestamp, key))
             except (IndexError, ValueError):
                 print("Skipping file {key} due to unexpected naming format")
@@ -66,8 +76,10 @@ def read_from_s3_processed_bucket(s3_client=None):
         print(file_dates_list)
 
         latest_file = file_dates_list[0][1]
-        
-        latest_file_object = s3_client.get_object(Bucket="processed-bucket20250303162226216400000005", Key=latest_file)
+
+        latest_file_object = s3_client.get_object(
+            Bucket="processed-bucket20250303162226216400000005", Key=latest_file
+        )
 
         buffer = io.BytesIO(latest_file_object["Body"].read())
         dataframe = pd.read_parquet(buffer, engine="pyarrow")
@@ -75,19 +87,27 @@ def read_from_s3_processed_bucket(s3_client=None):
 
     return data_frames_dict
 
+
 # connect to the (redshift?) warehouse, conn=
+
 
 def write_to_warehouse(data_frames_dict):
 
-    conn = None 
-# convert from parquet back to schema
+    conn = None
+    # convert from parquet back to schema
     try:
-        conn = psycopg2.connect(host=PG_HOST, port=PG_PORT, database=PG_DATABASE, user=PG_USER, password=PG_PASSWORD)
+        conn = psycopg2.connect(
+            host=PG_HOST,
+            port=PG_PORT,
+            database=PG_DATABASE,
+            user=PG_USER,
+            password=PG_PASSWORD,
+        )
         cur = conn.cursor()
 
         with closing(conn.cursor()) as cur:
             for table_name in data_frames_dict.keys():
-                query = f"SELECT * FROM {table_name}" 
+                query = f"SELECT * FROM {table_name}"
                 cur.execute(query)
                 query_results = cur.fetchall()
                 print(query_results)
@@ -95,7 +115,9 @@ def write_to_warehouse(data_frames_dict):
         raise RuntimeError(f"Warehouse database operation failed: {e}")
     finally:
         if conn:
-            conn.close()  
+            conn.close()
+
+
 # Insert data into redshift via postgres query
 # upload to warehouse in defined intervals
 # must be adequately logged in cloudwatch
